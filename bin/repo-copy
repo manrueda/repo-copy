@@ -12,15 +12,31 @@ program
   .usage('[options] <repo path ...>')
   .option('-c, --copy', 'Copy repository')
   .option('-z, --compress', 'Compress repository')
-  .option('-o, --out [stat]', 'Output', path.resolve(process.cwd(), 'repository.zip'))
+  .option('-o, --out [stat]', 'Output (repo.tar.gz or copyFolder/)', path.resolve(process.cwd(), 'repository.tar.gz'))
   .parse(process.argv);
 
 debugger;
 
-if (!program.copy && !program.compress && program.args.length === 0){
+if (program.copy && program.args.length === 0){
+  try {
+    var stat = fs.statAsync(program.out);
+    if (!stat.isDirectory()){
+      console.log('The output must be a folder');
+      return;
+    }
+  } catch (e) {
+    console.log('The output folder can\'t be founded');
+    return;
+  }
+
+}else if (program.compress && program.args.length === 0) {
+
+}else{
   program.outputHelp();
   return;
 }
+
+
 var repoPath = path.join(process.cwd(), program.args[0], '.git');
 debug('Repo path: %s', repoPath);
 
