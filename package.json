@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/ManRueda/repo-copy#readme",
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "commander": "^2.9.0",
     "debug": "^2.2.0",
     "fstream": "^1.0.8",
