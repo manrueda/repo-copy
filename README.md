@@ -1,4 +1,6 @@
 # repo-copy
+[![npm (scoped)](https://img.shields.io/npm/v/repo-copy.svg)](https://www.npmjs.com/package/repo-copy)
+[![npm](https://img.shields.io/npm/l/repo-copy.svg)](https://www.npmjs.com/package/repo-copy)
 Git repository copy/compressor.
 
 The idea of this small tool is to make quick copies of a git repository.
