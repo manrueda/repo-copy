@@ -11,31 +11,22 @@ program
   .version(pkg.version)
   .usage('[options] <repo path ...>')
   .option('-c, --copy', 'Copy repository')
-  .option('-z, --compress', 'Compress repository')
+  .option('-k, --compress', 'Compress repository')
+  .option('-t, --gzip', 'Use tar and gzip to create the compressed file')
+  .option('-z, --zip', 'Use zip to create the compressed file')
   .option('-o, --out [stat]', 'Output (repo.tar.gz or copyFolder/)', path.resolve(process.cwd(), 'repository.tar.gz'))
   .parse(process.argv);
 
 debugger;
 
-if (program.copy && program.args.length === 0){
-  try {
-    var stat = fs.statAsync(program.out);
-    if (!stat.isDirectory()){
-      console.log('The output must be a folder');
-      return;
-    }
-  } catch (e) {
-    console.log('The output folder can\'t be founded');
-    return;
-  }
-
-}else if (program.compress && program.args.length === 0) {
-
-}else{
+var canStart = module.validateProgram(program);
+if (canStart === false){
   program.outputHelp();
   return;
+}else if (canStart instanceof Error) {
+  console.log(canStart.message);
+  return;
 }
-
 
 var repoPath = path.join(process.cwd(), program.args[0], '.git');
 debug('Repo path: %s', repoPath);
@@ -51,19 +42,17 @@ module.isGitRepo(repoPath).then((isIt) => {
     return module.createCopy(path.resolve(repoPath, '..'), files, path.resolve(os.tmpdir(), 'repo-copy' + process.hrtime()[0]));
   }
 }).then((tempFolder) => {
-  debug('Temporal folder: %s', tempFolder[tempFolder.length - 1]);
+  debug('Temporal folder: %s', tempFolder);
 
-  if (program.compress){
-    module.createTarGz(tempFolder[tempFolder.length - 1], program.out);
+  if (program.compress && program.gzip){
+    module.createTarGzip(tempFolder, program.out);
+  }else if (program.compress && program.zip){
+    module.createZip(tempFolder, program.out);
   }
   return true;
 
 }).then((success) => {
-  if (program.compress && success){
-    console.log('The repository was copy at: ' + program.out);
-  }else{
-    console.log('The repository was copy at: ' + program.out);
-  }
+  console.log('The repository was copy at: ' + program.out);
 }).catch((err) => {
   if (err.code === 'ENOENT' && err.path.indexOf('.git') !== -1){
     console.log('This path is not a git repository (' + err.path.replace('/.git', '') + ')');
