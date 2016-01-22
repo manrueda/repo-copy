@@ -1,0 +1,38 @@
+{
+  "name": "repo-copy",
+  "version": "0.1.0",
+  "description": "Git repository copy/compressor",
+  "main": "bin/repo-copy",
+  "scripts": {
+    "test": "tape test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ManRueda/repo-copy.git"
+  },
+  "keywords": [
+    "git",
+    "repository",
+    "copy",
+    "compressor"
+  ],
+  "preferGlobal": true,
+  "bin": {
+    "repo-copy": "./bin/repo-copy"
+  },
+  "author": "Manuel Rueda <manuel.rueda.un@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ManRueda/repo-copy/issues"
+  },
+  "homepage": "https://github.com/ManRueda/repo-copy#readme",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "debug": "^2.2.0",
+    "fstream": "^1.0.8",
+    "glob": "^6.0.4",
+    "ignore": "^2.2.19",
+    "promise": "^7.1.1",
+    "tar": "^2.2.1"
+  }
+}

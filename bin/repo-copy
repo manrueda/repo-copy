@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+
+var program = require('commander');
+var path = require('path');
+var os = require('os');
+var pkg = require('../package.json');
+var module = require('../src/repo-copy');
+var debug = require('debug')('repo-copy:bin');
+
+program
+  .version(pkg.version)
+  .usage('[options] <repo path ...>')
+  .option('-c, --copy', 'Copy repository')
+  .option('-z, --compress', 'Compress repository')
+  .option('-o, --out [stat]', 'Output', path.resolve(process.cwd(), 'repository.zip'))
+  .parse(process.argv);
+
+debugger;
+
+if (!program.copy && !program.compress && program.args.length === 0){
+  program.outputHelp();
+  return;
+}
+var repoPath = path.join(process.cwd(), program.args[0], '.git');
+debug('Repo path: %s', repoPath);
+
+module.isGitRepo(repoPath).then((isIt) => {
+  debug('Is a repo?: %s', isIt);
+  return module.getFiles(repoPath);
+}).then((files) => {
+  debug('Path files: %o', files);
+  if (program.copy && program.out !== path.resolve(process.cwd(), 'repository.zip')){
+    return module.createCopy(path.resolve(repoPath, '..'), files, program.out);
+  }else{
+    return module.createCopy(path.resolve(repoPath, '..'), files, path.resolve(os.tmpdir(), 'repo-copy' + process.hrtime()[0]));
+  }
+}).then((tempFolder) => {
+  debug('Temporal folder: %s', tempFolder[tempFolder.length - 1]);
+
+  if (program.compress){
+    module.createTarGz(tempFolder[tempFolder.length - 1], program.out);
+  }
+  return true;
+
+}).then((success) => {
+  if (program.compress && success){
+    console.log('The repository was copy at: ' + program.out);
+  }else{
+    console.log('The repository was copy at: ' + program.out);
+  }
+}).catch((err) => {
+  if (err.code === 'ENOENT' && err.path.indexOf('.git') !== -1){
+    console.log('This path is not a git repository (' + err.path.replace('/.git', '') + ')');
+  }else{
+    console.log(err);
+  }
+});
