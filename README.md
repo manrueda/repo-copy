@@ -1,5 +1,11 @@
 # repo-copy
-Git repository copy/compressor
+Git repository copy/compressor.
+
+The idea of this small tool is to make quick copies of a git repository.
+Honoring the .gitignore file and supporting compression.
+
+Could be used to move repositories to another directory or computer, even when there are no staged/commited changes.
+
 ## Usage
 
 ```
