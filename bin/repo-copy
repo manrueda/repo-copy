@@ -44,7 +44,7 @@ module.isGitRepo(repoPath).then((isIt) => {
 }).then((tempFolder) => {
   debug('Temporal folder: %s', tempFolder);
 
-  if (program.compress && program.gzip){
+  if (program.compress && !program.zip){
     module.createTarGzip(tempFolder, program.out);
   }else if (program.compress && program.zip){
     module.createZip(tempFolder, program.out);
