@@ -85,11 +85,17 @@ module.exports = {
   },
   createTarGzip: (tempPath, destination) => {
 
-    fstream.Reader({ path: tempPath, type: 'Directory' }) /* Read the source directory */
-    .pipe(tar.Pack()) /* Convert the directory to a .tar file */
-    .pipe(zlib.Gzip()) /* Compress the .tar file */
-    .pipe(fstream.Writer({ path: destination })); /* Give the output file name */
 
+    return new Promise((resolve, reject) => {
+      var dest = fstream.Writer({ path: destination });
+      dest.on("close", function(ex) {
+        resolve(tempPath);
+      });
+      fstream.Reader({ path: tempPath, type: 'Directory' }) /* Read the source directory */
+      .pipe(tar.Pack()) /* Convert the directory to a .tar file */
+      .pipe(zlib.Gzip()) /* Compress the .tar file */
+      .pipe(dest); /* Give the output file name */
+    });
   },
   createZip: (tempPath, destination) => {
     var zip = new AdmZip();

@@ -3,7 +3,9 @@
 var program = require('commander');
 var path = require('path');
 var os = require('os');
+var fs = require('fs');
 var pkg = require('../package.json');
+var rimraf = require('rimraf');
 var module = require('../src/repo-copy');
 var debug = require('debug')('repo-copy:bin');
 
@@ -39,19 +41,30 @@ module.isGitRepo(repoPath).then((isIt) => {
   if (program.copy && program.out !== path.resolve(process.cwd(), 'repository.zip')){
     return module.createCopy(path.resolve(repoPath, '..'), files, program.out);
   }else{
-    return module.createCopy(path.resolve(repoPath, '..'), files, path.resolve(os.tmpdir(), 'repo-copy' + process.hrtime()[0]));
+    var destPath = path.resolve(os.tmpdir(), path.basename(path.resolve(repoPath, '..')));
+    try {
+      rimraf.sync(destPath);
+    }catch(ex){
+    }
+
+    return module.createCopy(path.resolve(repoPath, '..'), files, destPath);
   }
 }).then((tempFolder) => {
   debug('Temporal folder: %s', tempFolder);
 
   if (program.compress && !program.zip){
-    module.createTarGzip(tempFolder, program.out);
+    return module.createTarGzip(tempFolder, program.out);
   }else if (program.compress && program.zip){
     module.createZip(tempFolder, program.out);
   }
-  return true;
+  return tempFolder;
 
-}).then((success) => {
+}).then((tempFolder) => {
+  try {
+    rimraf.sync(tempFolder);
+  }catch(ex){
+
+  }
   console.log('The repository was copy at: ' + program.out);
 }).catch((err) => {
   if (err.code === 'ENOENT' && err.path.indexOf('.git') !== -1){
