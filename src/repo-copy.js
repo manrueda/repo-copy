@@ -9,9 +9,9 @@ var fstream = require('fstream');
 var tar = require('tar');
 var zlib = require('zlib');
 var AdmZip = require('adm-zip');
-var mkdirPromise = Promise.denodeify(fs.mkdir);
 
 module.exports = {
+  mkdirPromise: Promise.denodeify(fs.mkdir),
   validateProgram: (program) => {
     if (program.copy){
       if (program.args.length === 0)
@@ -22,7 +22,6 @@ module.exports = {
           return new Error('The output must be a folder');
         }
       } catch (e) {
-        console.log(e);
         return new Error('The output folder can\'t be founded');
       }
     }else if (program.compress){
@@ -34,24 +33,17 @@ module.exports = {
     return true;
   },
   isGitRepo: (path) => {
-    return new Promise((resolve, reject) => {
-      fs.stat(path, (err, stat) => {
-        if (err){
-          reject(err);
-        }else{
-          resolve(stat.isDirectory());
-        }
-      });
-    });
+    if (path === undefined || path === null || path === ''){
+      return Promise.resolve(false);
+    }
+    return checkDirectory(_path.resolve(path, '.git'));
   },
   getFiles: (path) => {
     return new Promise((resolve, reject) => {
-      var ig = ignore().addIgnoreFile(_path.resolve(path, '..', '.gitignore'));
+      var ig = ignore().addIgnoreFile(_path.resolve(path, '.gitignore'));
       glob('**', {
-        cwd: _path.resolve(path, '..')
+        cwd: path
       }, (err, files) => {
-        var filtered;
-
         if (err) {
             reject(err);
         } else {
@@ -64,12 +56,18 @@ module.exports = {
     var proms = [];
     //Add the promise to create the temp folder
     proms.push(() => {
-      return mkdirPromise(tempPath);
+      return checkDirectory(tempPath).then((exist) => {
+        if (!exist){
+          return module.exports.mkdirPromise(tempPath);
+        }else{
+          return Promise.resolve();
+        }
+      });
     });
 
     //add all the promises that copy the files
     files.forEach((file) => {
-      proms.push(copyFile(_path.resolve(base, file), _path.resolve(tempPath, file)));
+      proms.push(module.exports.copyFile(_path.resolve(base, file), _path.resolve(tempPath, file)));
     });
 
     //add the promise to return the temp folder
@@ -107,6 +105,23 @@ module.exports = {
   }
 };
 
+
+function checkDirectory(directory) {
+  return new Promise((resolve, reject) => {
+    fs.stat(directory, function(err, stats) {
+      if (err){
+        if (err.code === 'ENOENT'){
+          resolve(false);
+        }else{
+          reject(err);
+        }
+      }else{
+        resolve(true);
+      }
+    });
+  });
+}
+module.exports.copyFile = copyFile;
 function copyFile(source, target){
   return () => {
     return new Promise((resolve, reject) => {
@@ -141,3 +156,4 @@ function copyFile(source, target){
     });
   };
 }
+module.exports.copyFile = copyFile;

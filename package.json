@@ -5,7 +5,8 @@
   "main": "bin/repo-copy",
   "scripts": {
     "test": "./node_modules/tape/bin/tape test/*",
-    "cov": "./node_modules/istanbul/lib/cli.js cover node_modules/.bin/tape --report lcovonly test/*.js && coveralls < ./coverage/lcov.info"
+    "cov": "./node_modules/istanbul/lib/cli.js cover node_modules/.bin/tape --report lcovonly test/*.js && coveralls < ./coverage/lcov.info",
+    "covHTML": "./node_modules/istanbul/lib/cli.js cover node_modules/.bin/tape --report html test/*.js"
   },
   "repository": {
     "type": "git",

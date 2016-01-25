@@ -71,3 +71,16 @@ test('validateProgram - copy with origin and bad output', (t) => {
 
   t.end();
 });
+
+test('validateProgram - copy with origin and good output', (t) => {
+  debugger;
+  var result = module.validateProgram({
+    copy: true,
+    out: path.resolve(process.cwd(), 'src'),
+    args: ['../']
+  });
+
+  t.true(result);
+
+  t.end();
+});

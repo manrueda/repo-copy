@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 var program = require('commander');
+var Promise = require('promise');
 var path = require('path');
 var os = require('os');
 var fs = require('fs');
@@ -19,7 +20,9 @@ program
   .option('-o, --out [stat]', 'Output (repo.tar.gz or copyFolder/)', path.resolve(process.cwd(), 'repository.tar.gz'))
   .parse(process.argv);
 
-debugger;
+if (program.copy && program.out === path.resolve(process.cwd(), 'repository.tar.gz')){
+  program.out = '';
+}
 
 var canStart = module.validateProgram(program);
 if (canStart === false){
@@ -30,24 +33,28 @@ if (canStart === false){
   return;
 }
 
-var repoPath = path.join(process.cwd(), program.args[0], '.git');
+var repoPath = path.join(process.cwd(), program.args[0]);
 debug('Repo path: %s', repoPath);
 
 module.isGitRepo(repoPath).then((isIt) => {
   debug('Is a repo?: %s', isIt);
-  return module.getFiles(repoPath);
+  if (isIt){
+    return module.getFiles(repoPath);
+  }else{
+    return Promise.reject('This path is not a git repository (' + repoPath + ')');
+  }
 }).then((files) => {
   debug('Path files: %o', files);
   if (program.copy && program.out !== path.resolve(process.cwd(), 'repository.zip')){
-    return module.createCopy(path.resolve(repoPath, '..'), files, program.out);
+    return module.createCopy(repoPath, files, program.out);
   }else{
-    var destPath = path.resolve(os.tmpdir(), path.basename(path.resolve(repoPath, '..')));
+    var destPath = path.resolve(os.tmpdir(), path.basename(repoPath));
     try {
       rimraf.sync(destPath);
     }catch(ex){
     }
 
-    return module.createCopy(path.resolve(repoPath, '..'), files, destPath);
+    return module.createCopy(repoPath, files, destPath);
   }
 }).then((tempFolder) => {
   debug('Temporal folder: %s', tempFolder);
@@ -61,7 +68,8 @@ module.isGitRepo(repoPath).then((isIt) => {
 
 }).then((tempFolder) => {
   try {
-    rimraf.sync(tempFolder);
+    if (!program.copy)
+      rimraf.sync(tempFolder);
   }catch(ex){
 
   }
