@@ -39,6 +39,8 @@
     "tar": "^2.2.1"
   },
   "devDependencies": {
+    "coveralls": "^2.11.6",
+    "istanbul": "^0.4.2",
     "tape": "^4.4.0"
   }
 }
