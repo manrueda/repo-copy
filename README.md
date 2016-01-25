@@ -1,6 +1,8 @@
 # repo-copy
 [![npm (scoped)](https://img.shields.io/npm/v/repo-copy.svg)](https://www.npmjs.com/package/repo-copy)
 [![npm](https://img.shields.io/npm/l/repo-copy.svg)](https://www.npmjs.com/package/repo-copy)
+[![Build Status](https://travis-ci.org/ManRueda/repo-copy.svg?branch=master)](https://travis-ci.org/ManRueda/repo-copy)
+[![Coverage Status](https://coveralls.io/repos/github/ManRueda/repo-copy/badge.svg?branch=master)](https://coveralls.io/github/ManRueda/repo-copy?branch=master)
 
 Git repository copy/compressor.
 

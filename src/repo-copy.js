@@ -17,11 +17,12 @@ module.exports = {
       if (program.args.length === 0)
         return new Error('Need to provide a repository path');
       try {
-        var stat = fs.statAsync(program.out);
+        var stat = fs.statSync(program.out);
         if (!stat.isDirectory()){
           return new Error('The output must be a folder');
         }
       } catch (e) {
+        console.log(e);
         return new Error('The output folder can\'t be founded');
       }
     }else if (program.compress){
